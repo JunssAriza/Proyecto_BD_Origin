@@ -79,6 +79,31 @@ app.delete("/productos/:id", (req, res) => {
   });
 });
 
+
+app.post("/contactos", (req, res) => {
+  const { nombre, email, asunto, mensaje } = req.body;
+
+  const sql = `
+    INSERT INTO contactos (nombre, email, asunto, mensaje)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  const valores = [nombre, email, asunto, mensaje];
+
+  conexion.query(sql, valores, (error, resultado) => {
+    if (error) {
+      console.error("Error al insertar el mensaje:", error);
+      return res.status(500).json({ mensaje: "Error al guardar el mensaje" });
+    }
+
+    res.status(201).json({
+      mensaje: "Mensaje enviado correctamente",
+      id: resultado.insertId,
+    });
+  });
+});
+
+
 // Iniciar servidor en el puerto 3000
 app.listen(3000, () => {
   console.log(" Servidor ejecutándose en http://localhost:3000");

@@ -98,6 +98,13 @@ main {
     margin-bottom: 35px;
 }
 
+.contacto-contenedor {
+    grid-template-columns: 1.3fr 0.7fr;
+    gap: 25px;
+    align-items: start;
+    margin-bottom: 25px;
+}
+
 /* Tarjeta contenedora blanca */
 .tarjeta {
     background-color: #ffffff;
@@ -142,6 +149,11 @@ textarea {
     border-radius: 8px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea {
+    min-height: 140px;
+    resize: vertical;
 }
 
 input:focus,
@@ -199,6 +211,40 @@ textarea:focus {
 
 .btn-contacto:hover {
     background-color: #334155;
+}
+
+.lista-contacto {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 10px;
+}
+
+.lista-contacto li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.lista-contacto li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.etiqueta {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+}
+
+@media (max-width: 768px) {
+    .contacto-contenedor {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* --- Tarjetas de Producto --- */

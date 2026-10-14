@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Tienda — Gestión de Productos</title>
+
+  <!-- Fuente moderna -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- ===== BARRA DE NAVEGACIÓN (NAVBAR) ===== -->
+  <header class="navbar">
+    <div class="contenedor nav-contenido">
+      <a href="index.html" class="logo"> Mi<strong>Tienda</strong></a>
+      <nav class="nav-links">
+        <a href="index.html">Inicio</a>
+        <a href="Productos.html">Productos</a>
+        <a href="Contacto.html">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="contenedor" id="inicio">
+    <div class="encabezado-principal">
+      <h1>Contáctanos</h1>
+      <p>Envía tu mensaje para poder atender tu petición.</p>
+    </div>
+
+    <section class="contacto-contenedor">
+      <div class="tarjeta contacto-formulario">
+        <h2>Envíanos un mensaje</h2>
+        <form id="formularioContacto">
+          <div class="campo">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required />
+          </div>
+
+          <div class="campo">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" placeholder="tuemail@ejemplo.com" required />
+          </div>
+
+          <div class="campo">
+            <label for="asunto">Asunto</label>
+            <input type="text" id="asunto" name="asunto" placeholder="¿Sobre qué quieres hablar?" required />
+          </div>
+
+          <div class="campo">
+            <label for="mensaje">Mensaje</label>
+            <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje" required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-contacto">Enviar mensaje</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>

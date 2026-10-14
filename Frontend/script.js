@@ -18,7 +18,14 @@ async function cargarProductos() {
 
   try {
     const respuesta = await fetch(`${API_URL}/productos`);
+    if (!respuesta.ok) {
+      throw new Error(`El servidor respondió con el error ${respuesta.status}.`);
+    }
+
     const productos = await respuesta.json();
+    if (!Array.isArray(productos)) {
+      throw new Error("La respuesta del servidor no contiene una lista de productos.");
+    }
 
     listaProductos.innerHTML = "";
 
@@ -47,6 +54,11 @@ async function cargarProductos() {
     });
   } catch (error) {
     console.error("Error al cargar productos:", error);
+    listaProductos.innerHTML = "";
+    const mensaje = document.createElement("p");
+    mensaje.style.color = "#b91c1c";
+    mensaje.textContent = `No se pudieron cargar los productos. ${error.message} Revisa que el backend esté activo y la conexión a MySQL.`;
+    listaProductos.appendChild(mensaje);
   }
 }
 
@@ -134,10 +146,38 @@ async function eliminarProducto(id) {
 
 // 5. Formulario de contacto (demostrativo en contacto.html)
 if (formContacto) {
-  formContacto.addEventListener("submit", (e) => {
+  formContacto.addEventListener("submit", async (e) => {
     e.preventDefault();
-    alert("¡Mensaje de contacto enviado con éxito!");
-    formContacto.reset();
+
+    const datos = {
+      nombre: document.getElementById("nombre").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      asunto: document.getElementById("asunto").value.trim(),
+      mensaje: document.getElementById("mensaje").value.trim()
+    };
+
+    try {
+      const respuesta = await fetch("http://localhost:3000/contactos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(datos)
+      });
+
+      const resultado = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(resultado.mensaje || "Error al guardar el mensaje");
+      }
+
+      alert("¡Mensaje enviado correctamente!");
+      formContacto.reset();
+
+    } catch (error) {
+      console.error("Error al enviar contacto:", error);
+      alert("No se pudo enviar el mensaje. Intenta de nuevo.");
+    }
   });
 }
 
