@@ -28,11 +28,19 @@
     </div>
   </header>
 
-    <main class="contenedor" id="inicio">
+  <main class="contenedor" id="inicio">
     <div class="encabezado-principal">
       <h1>Inventario de Productos</h1>
-      <p>Panel de control del inventario y productos en stock</p>
+      <p>Productos disponibles en la tienda</p>
     </div>
-    </main>
 
+    <section class="tarjeta" id="productos" aria-labelledby="tituloProductos">
+      <h2 id="tituloProductos">Lista de Productos</h2>
+      <div id="listaProductos" class="lista-productos" aria-live="polite">
+        <p>Cargando productos...</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
 </body>

@@ -1,4 +1,6 @@
-const API_URL = "https://proyecto-bd-2.onrender.com";
+const API_URL = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+  ? "http://localhost:3000"
+  : "https://proyecto-bd-origin.onrender.com";
 
 // Elementos del DOM
 const listaProductos = document.getElementById("listaProductos");
@@ -17,13 +19,22 @@ async function cargarProductos() {
   if (!listaProductos) return;
 
   try {
-    const respuesta = await fetch(`${API_URL}/productos`);
-    const productos = await respuesta.json();
+    const respuesta = await fetch(`${API_URL}/productos`, { cache: "no-store" });
+    if (!respuesta.ok) {
+      throw new Error(`El servidor respondió con el error ${respuesta.status}.`);
+    }
 
-    listaProductos.innerHTML = "";
+    const productos = await respuesta.json();
+    if (!Array.isArray(productos)) {
+      throw new Error("La respuesta del servidor no contiene una lista de productos.");
+    }
+
+    listaProductos.replaceChildren();
 
     if (productos.length === 0) {
-      listaProductos.innerHTML = "<p style='color: #64748b;'>No hay productos registrados.</p>";
+      const mensaje = document.createElement("p");
+      mensaje.textContent = "No hay productos registrados.";
+      listaProductos.appendChild(mensaje);
       return;
     }
 
@@ -31,22 +42,49 @@ async function cargarProductos() {
       const elemento = document.createElement("div");
       elemento.classList.add("producto");
 
-      elemento.innerHTML = `
-        <div>
-          <h3>${producto.nombre}</h3>
-          <p class="producto-precio">Precio: $${producto.precio}</p>
-          <p>Stock: ${producto.stock} unidades</p>
-        </div>
-        <div class="acciones">
-          <button class="btn-editar" onclick="cargarEnFormulario(${producto.id}, '${producto.nombre}', ${producto.precio}, ${producto.stock})">Editar</button>
-          <button class="btn-eliminar" onclick="eliminarProducto(${producto.id})">Eliminar</button>
-        </div>
-      `;
+      const detalles = document.createElement("div");
+      const nombre = document.createElement("h3");
+      nombre.textContent = producto.nombre;
+
+      const precio = document.createElement("p");
+      precio.className = "producto-precio";
+      precio.textContent = `Precio: $${producto.precio}`;
+
+      const stock = document.createElement("p");
+      stock.textContent = `Stock: ${producto.stock} unidades`;
+      detalles.append(nombre, precio, stock);
+      elemento.appendChild(detalles);
+
+      if (formulario) {
+        const acciones = document.createElement("div");
+        acciones.className = "acciones";
+
+        const botonEditar = document.createElement("button");
+        botonEditar.type = "button";
+        botonEditar.className = "btn-editar";
+        botonEditar.textContent = "Editar";
+        botonEditar.addEventListener("click", () => {
+          cargarEnFormulario(producto.id, producto.nombre, producto.precio, producto.stock);
+        });
+
+        const botonEliminar = document.createElement("button");
+        botonEliminar.type = "button";
+        botonEliminar.className = "btn-eliminar";
+        botonEliminar.textContent = "Eliminar";
+        botonEliminar.addEventListener("click", () => eliminarProducto(producto.id));
+
+        acciones.append(botonEditar, botonEliminar);
+        elemento.appendChild(acciones);
+      }
 
       listaProductos.appendChild(elemento);
     });
   } catch (error) {
     console.error("Error al cargar productos:", error);
+    const mensaje = document.createElement("p");
+    mensaje.className = "estado-contacto error";
+    mensaje.textContent = `No se pudieron cargar los productos. ${error.message}`;
+    listaProductos.replaceChildren(mensaje);
   }
 }
 
@@ -151,7 +189,7 @@ if (formContacto) {
     mostrarEstado("Enviando tu mensaje...", "cargando");
 
     try {
-      const respuesta = await fetch(`${API_URL}/contacto`, {
+      const respuesta = await fetch(`${API_URL}/contactanos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos),
@@ -190,11 +228,14 @@ async function cargarMensajesContacto() {
   estado.className = "estado-contacto cargando";
 
   try {
-    const respuesta = await fetch(`${API_URL}/contacto/mensajes`);
+    const respuesta = await fetch(`${API_URL}/contactanos`, { cache: "no-store" });
     const resultado = await respuesta.json();
 
     if (!respuesta.ok) {
       throw new Error(resultado.mensaje || "No se pudieron cargar los mensajes");
+    }
+    if (!Array.isArray(resultado)) {
+      throw new Error("La respuesta del servidor no contiene una lista de mensajes");
     }
 
     lista.replaceChildren();
@@ -213,11 +254,7 @@ async function cargarMensajesContacto() {
 
       const meta = document.createElement("p");
       meta.className = "mensaje-meta";
-      const fecha = new Date(mensaje.fecha_creacion);
-      const fechaTexto = Number.isNaN(fecha.getTime())
-        ? "Fecha no disponible"
-        : fecha.toLocaleString("es");
-      meta.textContent = `${mensaje.nombre} · ${fechaTexto}`;
+      meta.textContent = mensaje.nombre;
 
       const cuerpo = document.createElement("p");
       cuerpo.className = "mensaje-contenido";
@@ -249,7 +286,7 @@ async function eliminarMensajeContacto(id) {
   if (!confirm("¿Deseas eliminar este mensaje de forma permanente?")) return;
 
   try {
-    const respuesta = await fetch(`${API_URL}/contacto/mensajes/${id}`, {
+    const respuesta = await fetch(`${API_URL}/contactanos/${encodeURIComponent(id)}`, {
       method: "DELETE",
     });
     const resultado = await respuesta.json();
