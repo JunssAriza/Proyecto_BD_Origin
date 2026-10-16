@@ -61,6 +61,20 @@
           <button type="submit" class="btn btn-contacto">Enviar mensaje</button>
         </form>
       </div>
+
+      <section class="tarjeta mensajes-contacto" aria-labelledby="tituloMensajes">
+        <h2 id="tituloMensajes">Mensajes recibidos</h2>
+        <p class="subtitulo-contacto">Ingresa la clave de administrador para consultar y gestionar los mensajes.</p>
+        <form id="formularioAdministrador" class="formulario-administrador">
+          <div class="campo">
+            <label for="claveAdministrador">Clave de administrador</label>
+            <input type="password" id="claveAdministrador" autocomplete="current-password" required />
+          </div>
+          <button type="submit" class="btn btn-contacto">Ver mensajes</button>
+        </form>
+        <p id="estadoMensajes" class="estado-mensajes" role="status" aria-live="polite"></p>
+        <div id="listaMensajes" class="lista-mensajes"></div>
+      </section>
     </section>
   </main>
 

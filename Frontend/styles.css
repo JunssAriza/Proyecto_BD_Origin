@@ -99,9 +99,9 @@ main {
 }
 
 .contacto-contenedor {
-    grid-template-columns: 1.3fr 0.7fr;
+    display: flex;
+    flex-direction: column;
     gap: 25px;
-    align-items: start;
     margin-bottom: 25px;
 }
 
@@ -324,6 +324,59 @@ textarea:focus {
     color: #64748b;
     font-size: 0.9rem;
     margin-bottom: 15px;
+}
+
+.formulario-administrador {
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.formulario-administrador .campo {
+    width: 100%;
+    max-width: 360px;
+}
+
+.estado-mensajes {
+    color: #64748b;
+    margin-top: 14px;
+}
+
+.mensaje-contacto {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.mensaje-contacto:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.mensaje-contacto h3 {
+    font-size: 1rem;
+    color: #0f172a;
+}
+
+.mensaje-contacto p {
+    overflow-wrap: anywhere;
+}
+
+.mensaje-contacto .correo-mensaje,
+.mensaje-contacto .detalle-mensaje {
+    color: #64748b;
+}
+
+.btn-eliminar-mensaje {
+    align-self: flex-start;
+    padding: 8px 14px;
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-eliminar-mensaje:hover {
+    background-color: #fca5a5;
 }
 
 .fila-contacto {

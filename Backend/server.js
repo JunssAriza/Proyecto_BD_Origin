@@ -86,7 +86,7 @@ app.post('/contactanos', (req, res) => {
         });
     }
 
-    const sql = "INSERT INTO Contactanos (nombre, correo, asunto, mensaje) VALUES (?, ?, ?, ?)";
+    const sql = "INSERT INTO contactos (nombre, email, asunto, mensaje) VALUES (?, ?, ?, ?)";
 
     conexion.query(sql, valores, (error) => {
         if (error) {
@@ -103,7 +103,7 @@ app.post('/contactanos', (req, res) => {
 });
 
 app.get('/contactanos', requiereAdministrador, (req, res) => {
-    const sql = "SELECT id, nombre, correo, asunto, mensaje FROM Contactanos ORDER BY id DESC";
+    const sql = "SELECT id, nombre, email AS correo, asunto, mensaje FROM contactos ORDER BY id DESC";
 
     conexion.query(sql, (error, resultados) => {
         if (error) {
@@ -126,7 +126,7 @@ app.delete('/contactanos/:id', requiereAdministrador, (req, res) => {
         });
     }
 
-    const sql = "DELETE FROM Contactanos WHERE id = ?";
+    const sql = "DELETE FROM contactos WHERE id = ?";
 
     conexion.query(sql, [id], (error, resultados) => {
         if (error) {

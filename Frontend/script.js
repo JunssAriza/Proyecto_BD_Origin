@@ -11,6 +11,10 @@ const btnGuardar = document.getElementById("btnGuardar");
 const btnCancelar = document.getElementById("btnCancelar");
 const tituloFormulario = document.getElementById("tituloFormulario");
 const formContacto = document.getElementById("formularioContacto");
+const formularioAdministrador = document.getElementById("formularioAdministrador");
+const listaMensajes = document.getElementById("listaMensajes");
+const estadoMensajes = document.getElementById("estadoMensajes");
+let claveAdministrador = "";
 
 // 1. Función para consultar los productos y mostrarlos en el DOM (READ)
 async function cargarProductos() {
@@ -151,13 +155,13 @@ if (formContacto) {
 
     const datos = {
       nombre: document.getElementById("nombre").value.trim(),
-      email: document.getElementById("email").value.trim(),
+      correo: document.getElementById("email").value.trim(),
       asunto: document.getElementById("asunto").value.trim(),
       mensaje: document.getElementById("mensaje").value.trim()
     };
 
     try {
-      const respuesta = await fetch("http://localhost:3000/contactos", {
+      const respuesta = await fetch(`${API_URL}/contactanos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -176,8 +180,94 @@ if (formContacto) {
 
     } catch (error) {
       console.error("Error al enviar contacto:", error);
-      alert("No se pudo enviar el mensaje. Intenta de nuevo.");
+      const detalle = error instanceof Error ? error.message : "Error desconocido";
+      alert(`No se pudo enviar el mensaje. ${detalle}`);
     }
+  });
+}
+
+async function cargarMensajes() {
+  estadoMensajes.textContent = "Cargando mensajes...";
+  listaMensajes.replaceChildren();
+
+  try {
+    const respuesta = await fetch(`${API_URL}/contactanos`, {
+      headers: { "X-Admin-Password": claveAdministrador }
+    });
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      throw new Error(resultado.mensaje || "No se pudieron cargar los mensajes.");
+    }
+    if (!Array.isArray(resultado)) {
+      throw new Error("La respuesta del servidor no contiene una lista de mensajes.");
+    }
+
+    if (resultado.length === 0) {
+      estadoMensajes.textContent = "No hay mensajes recibidos.";
+      return;
+    }
+
+    estadoMensajes.textContent = "";
+    resultado.forEach((mensaje) => {
+      const tarjetaMensaje = document.createElement("article");
+      tarjetaMensaje.className = "mensaje-contacto";
+
+      const titulo = document.createElement("h3");
+      titulo.textContent = mensaje.asunto;
+
+      const remitente = document.createElement("p");
+      remitente.textContent = mensaje.nombre;
+
+      const correo = document.createElement("p");
+      correo.className = "correo-mensaje";
+      correo.textContent = mensaje.correo;
+
+      const contenido = document.createElement("p");
+      contenido.className = "detalle-mensaje";
+      contenido.textContent = mensaje.mensaje;
+
+      const botonEliminar = document.createElement("button");
+      botonEliminar.type = "button";
+      botonEliminar.className = "btn btn-eliminar-mensaje";
+      botonEliminar.textContent = "Eliminar mensaje";
+      botonEliminar.addEventListener("click", () => eliminarMensaje(mensaje.id));
+
+      tarjetaMensaje.append(titulo, remitente, correo, contenido, botonEliminar);
+      listaMensajes.appendChild(tarjetaMensaje);
+    });
+  } catch (error) {
+    console.error("Error al cargar mensajes de contacto:", error);
+    estadoMensajes.textContent = error.message;
+  }
+}
+
+async function eliminarMensaje(id) {
+  if (!confirm("¿Deseas eliminar este mensaje?")) return;
+
+  try {
+    const respuesta = await fetch(`${API_URL}/contactanos/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: { "X-Admin-Password": claveAdministrador }
+    });
+    const resultado = await respuesta.json();
+
+    if (!respuesta.ok) {
+      throw new Error(resultado.mensaje || "No se pudo eliminar el mensaje.");
+    }
+
+    await cargarMensajes();
+  } catch (error) {
+    console.error("Error al eliminar mensaje de contacto:", error);
+    estadoMensajes.textContent = error.message;
+  }
+}
+
+if (formularioAdministrador) {
+  formularioAdministrador.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    claveAdministrador = document.getElementById("claveAdministrador").value;
+    await cargarMensajes();
   });
 }
 
