@@ -326,16 +326,6 @@ textarea:focus {
     margin-bottom: 15px;
 }
 
-.formulario-administrador {
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.formulario-administrador .campo {
-    width: 100%;
-    max-width: 360px;
-}
-
 .estado-mensajes {
     color: #64748b;
     margin-top: 14px;

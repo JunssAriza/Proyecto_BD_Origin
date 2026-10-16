@@ -1,35 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { timingSafeEqual } = require('crypto');
 const conexion = require('./db');
-const contrasenaAdministrador = '1234';
 
 // Middlewares globales
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-function requiereAdministrador(req, res, next) {
-    const contrasenaRecibida = req.get('X-Admin-Password');
-
-    if (typeof contrasenaRecibida !== 'string') {
-        return res.status(401).json({
-            mensaje: "Contraseña de administrador inválida"
-        });
-    }
-
-    const esperada = Buffer.from(contrasenaAdministrador, 'utf8');
-    const recibida = Buffer.from(contrasenaRecibida, 'utf8');
-
-    if (esperada.length !== recibida.length || !timingSafeEqual(esperada, recibida)) {
-        return res.status(401).json({
-            mensaje: "Contraseña de administrador inválida"
-        });
-    }
-
-    next();
-}
 
 app.get(['/', '/productos'], (req, res) => {
     const sql = "SELECT * FROM productos";
@@ -102,7 +79,7 @@ app.post('/contactanos', (req, res) => {
     });
 });
 
-app.get('/contactanos', requiereAdministrador, (req, res) => {
+app.get('/contactanos', (req, res) => {
     const sql = "SELECT id, nombre, email AS correo, asunto, mensaje FROM contactos ORDER BY id DESC";
 
     conexion.query(sql, (error, resultados) => {
@@ -117,7 +94,7 @@ app.get('/contactanos', requiereAdministrador, (req, res) => {
     });
 });
 
-app.delete('/contactanos/:id', requiereAdministrador, (req, res) => {
+app.delete('/contactanos/:id', (req, res) => {
     const { id } = req.params;
 
     if (!/^[1-9]\d*$/.test(id)) {

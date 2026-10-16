@@ -4,79 +4,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mi Tienda — Gestión de Productos</title>
+  <meta name="description" content="Escríbenos y envía tu mensaje al equipo de Mi Tienda." />
+  <title>Contacto — Mi Tienda</title>
 
-  <!-- Fuente moderna -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
     rel="stylesheet" />
-
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="contacto.css" />
 </head>
 
 <body>
-  <!-- ===== BARRA DE NAVEGACIÓN (NAVBAR) ===== -->
   <header class="navbar">
     <div class="contenedor nav-contenido">
-      <a href="index.html" class="logo"> Mi<strong>Tienda</strong></a>
-      <nav class="nav-links">
+      <a href="index.html" class="logo">Mi<strong>Tienda</strong></a>
+      <nav class="nav-links" aria-label="Navegación principal">
         <a href="index.html">Inicio</a>
-        <a href="Productos.html">Productos</a>
-        <a href="Contacto.html">Contacto</a>
+        <a href="index.html#productos">Productos</a>
+        <a href="contacto.html" aria-current="page">Contacto</a>
       </nav>
     </div>
   </header>
 
-  <main class="contenedor" id="inicio">
+  <main class="contenedor pagina-contacto">
     <div class="encabezado-principal">
       <h1>Contáctanos</h1>
-      <p>Envía tu mensaje para poder atender tu petición.</p>
+      <p>Completa el formulario y guardaremos tu mensaje para atenderte.</p>
     </div>
 
-    <section class="contacto-contenedor">
-      <div class="tarjeta contacto-formulario">
-        <h2>Envíanos un mensaje</h2>
-        <form id="formularioContacto">
-          <div class="campo">
-            <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required />
-          </div>
+    <section class="tarjeta tarjeta-contacto" aria-labelledby="tituloContacto">
+      <h2 id="tituloContacto">Envíanos un mensaje</h2>
+      <form id="formularioContacto">
+        <div class="campo">
+          <label for="contactoNombre">Nombre:</label>
+          <input type="text" id="contactoNombre" name="nombre" maxlength="100"
+            placeholder="Tu nombre" autocomplete="name" required />
+        </div>
 
-          <div class="campo">
-            <label for="email">Correo electrónico</label>
-            <input type="email" id="email" name="email" placeholder="tuemail@ejemplo.com" required />
-          </div>
+        <div class="campo">
+          <label for="contactoCorreo">Correo electrónico:</label>
+          <input type="email" id="contactoCorreo" name="correo" maxlength="254"
+            placeholder="tunombre@ejemplo.com" autocomplete="email" required />
+        </div>
 
-          <div class="campo">
-            <label for="asunto">Asunto</label>
-            <input type="text" id="asunto" name="asunto" placeholder="¿Sobre qué quieres hablar?" required />
-          </div>
+        <div class="campo">
+          <label for="contactoAsunto">Asunto:</label>
+          <input type="text" id="contactoAsunto" name="asunto" maxlength="150"
+            placeholder="¿Sobre qué quieres escribirnos?" required />
+        </div>
 
-          <div class="campo">
-            <label for="mensaje">Mensaje</label>
-            <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje" required></textarea>
-          </div>
+        <div class="campo">
+          <label for="contactoMensaje">Mensaje:</label>
+          <textarea id="contactoMensaje" name="mensaje" rows="6" maxlength="5000"
+            placeholder="Escribe tu mensaje aquí..." required></textarea>
+        </div>
 
-          <button type="submit" class="btn btn-contacto">Enviar mensaje</button>
-        </form>
-      </div>
+        <button type="submit" id="btnEnviarContacto" class="btn btn-contacto">
+          Enviar mensaje
+        </button>
+        <p id="estadoContacto" class="estado-contacto" role="status" aria-live="polite"></p>
+      </form>
+    </section>
 
-      <section class="tarjeta mensajes-contacto" aria-labelledby="tituloMensajes">
-        <h2 id="tituloMensajes">Mensajes recibidos</h2>
-        <p class="subtitulo-contacto">Ingresa la clave de administrador para consultar y gestionar los mensajes.</p>
-        <form id="formularioAdministrador" class="formulario-administrador">
-          <div class="campo">
-            <label for="claveAdministrador">Clave de administrador</label>
-            <input type="password" id="claveAdministrador" autocomplete="current-password" required />
-          </div>
-          <button type="submit" class="btn btn-contacto">Ver mensajes</button>
-        </form>
-        <p id="estadoMensajes" class="estado-mensajes" role="status" aria-live="polite"></p>
-        <div id="listaMensajes" class="lista-mensajes"></div>
-      </section>
+    <section class="tarjeta historial-contacto" aria-labelledby="tituloHistorial">
+      <h2 id="tituloHistorial">Mensajes recibidos</h2>
+      <p class="subtitulo-contacto">
+        Los mensajes son públicos. Por privacidad, no se muestran los correos electrónicos.
+      </p>
+
+      <p id="estadoHistorialContacto" class="estado-contacto" role="status" aria-live="polite"></p>
+      <div id="listaMensajesContacto" class="lista-mensajes-contacto"></div>
     </section>
   </main>
 
+  <footer class="footer">
+    <div class="contenedor footer-contenido">
+      <p>&copy; 2026 Mi Tienda — Proyecto Formativo con Node.js, Express y MySQL.</p>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
 </body>
+
+</html>
