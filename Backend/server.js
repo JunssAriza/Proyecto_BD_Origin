@@ -1,110 +1,199 @@
-const express = require("express");
-const cors = require("cors");
-const conexion = require("./db"); // Importamos la conexión creada en db.js
-
-const app = express();
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { timingSafeEqual } = require('crypto');
+const conexion = require('./db');
+const contrasenaAdministrador = '1234';
 
 // Middlewares globales
-app.use(cors()); // Permitir peticiones desde el frontend
-app.use(express.json()); // Habilitar la lectura de datos en formato JSON en el cuerpo (req.body)
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-// Ruta de prueba
-app.get("/", (req, res) => {
-  res.send("Servidor funcionando correctamente");
-});
+function requiereAdministrador(req, res, next) {
+    const contrasenaRecibida = req.get('X-Admin-Password');
 
-// 1. Obtener todos los productos (READ)
-app.get("/productos", (req, res) => {
-  const sql = "SELECT * FROM productos";
-
-  conexion.query(sql, (error, resultados) => {
-    if (error) {
-      console.error("Error al consultar:", error);
-      return res.status(500).json({ mensaje: "Error al consultar los productos" });
-    }
-    // Retornamos el array de productos como JSON al cliente
-    res.json(resultados);
-  });
-});
-
-// 2. Crear un nuevo producto (CREATE)
-app.post("/productos", (req, res) => {
-  const { nombre, precio, stock } = req.body;
-
-  // Consulta parametrizada con '?' para prevenir inyección SQL
-  const sql = "INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)";
-  const valores = [nombre, precio, stock];
-
-  conexion.query(sql, valores, (error, resultado) => {
-    if (error) {
-      console.error("Error al insertar:", error);
-      return res.status(500).json({ mensaje: "Error al crear el producto" });
+    if (typeof contrasenaRecibida !== 'string') {
+        return res.status(401).json({
+            mensaje: "Contraseña de administrador inválida"
+        });
     }
 
-    res.status(201).json({
-      mensaje: "Producto creado correctamente",
-      id: resultado.insertId,
+    const esperada = Buffer.from(contrasenaAdministrador, 'utf8');
+    const recibida = Buffer.from(contrasenaRecibida, 'utf8');
+
+    if (esperada.length !== recibida.length || !timingSafeEqual(esperada, recibida)) {
+        return res.status(401).json({
+            mensaje: "Contraseña de administrador inválida"
+        });
+    }
+
+    next();
+}
+
+app.get(['/', '/productos'], (req, res) => {
+    const sql = "SELECT * FROM productos";
+
+    conexion.query(sql, (error, results) => {
+        if (error) {
+            console.error("Error al consultar:", error);
+            return res.status(500).json({
+                error: "Error al consultar los productos"
+            });
+        }
+        res.json(results);
     });
-  });
 });
+// 2. Crear un producto (CREATE)
+app.post('/productos', (req, res) => {
+    const { nombre, precio, stock } = req.body;
 
-// 3. Actualizar un producto existente (UPDATE)
-app.put("/productos/:id", (req, res) => {
-  const id = req.params.id;
-  const { nombre, precio, stock } = req.body;
+    //Consulta parametrizada con '?' para prevenir inyeccion en SQL
+    const sql = "INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)";
+    const valores = [nombre, precio, stock];
 
-  const sql = "UPDATE productos SET nombre = ?, precio = ?, stock = ? WHERE id = ?";
-  const valores = [nombre, precio, stock, id];
-
-  conexion.query(sql, valores, (error, resultado) => {
-    if (error) {
-      console.error("Error al actualizar:", error);
-      return res.status(500).json({ mensaje: "Error al actualizar el producto" });
-    }
-    res.json({ mensaje: "Producto actualizado correctamente" });
-  });
-});
-
-// 4. Eliminar un producto (DELETE)
-app.delete("/productos/:id", (req, res) => {
-  const id = req.params.id;
-  const sql = "DELETE FROM productos WHERE id = ?";
-
-  conexion.query(sql, [id], (error, resultado) => {
-    if (error) {
-      console.error("Error al eliminar:", error);
-      return res.status(500).json({ mensaje: "Error al eliminar el producto" });
-    }
-    res.json({ mensaje: "Producto eliminado correctamente" });
-  });
-});
-
-
-app.post("/contactos", (req, res) => {
-  const { nombre, email, asunto, mensaje } = req.body;
-
-  const sql = `
-    INSERT INTO contactos (nombre, email, asunto, mensaje)
-    VALUES (?, ?, ?, ?)
-  `;
-
-  const valores = [nombre, email, asunto, mensaje];
-
-  conexion.query(sql, valores, (error, resultado) => {
-    if (error) {
-      console.error("Error al insertar el mensaje:", error);
-      return res.status(500).json({ mensaje: "Error al guardar el mensaje" });
-    }
-
-    res.status(201).json({
-      mensaje: "Mensaje enviado correctamente",
-      id: resultado.insertId,
+    conexion.query(sql, valores, (error, resultado) => {
+        if (error) {
+            console.error("Error al crear el producto:", error);
+            return res.status(500).json({
+                mensaje: "Error al crear el producto"
+            });
+        }
+        res.status(201).json({
+            mensaje: "Producto creado correctamente",
+        });
     });
-  });
 });
 
+app.post('/contactanos', (req, res) => {
+    const { nombre, correo, asunto, mensaje } = req.body || {};
+    const datos = [nombre, correo, asunto, mensaje];
 
-// Iniciar servidor en el puerto 3000
-app.listen(3000, () => {
-  console.log(" Servidor ejecutándose en http://localhost:3000");
+    if (datos.some((dato) => typeof dato !== 'string' || !dato.trim())) {
+        return res.status(400).json({
+            mensaje: "Todos los campos de contacto son obligatorios"
+        });
+    }
+
+    const valores = datos.map((dato) => dato.trim());
+    const [nombreValidado, correoValidado, asuntoValidado, mensajeValidado] = valores;
+
+    if (nombreValidado.length > 100 || correoValidado.length > 100 ||
+        asuntoValidado.length > 100 || mensajeValidado.length > 5000 ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoValidado)) {
+        return res.status(400).json({
+            mensaje: "Verifica el correo y la longitud de los campos"
+        });
+    }
+
+    const sql = "INSERT INTO Contactanos (nombre, correo, asunto, mensaje) VALUES (?, ?, ?, ?)";
+
+    conexion.query(sql, valores, (error) => {
+        if (error) {
+            console.error("Error al guardar el mensaje de contacto:", error);
+            return res.status(500).json({
+                mensaje: "Error al guardar el mensaje de contacto"
+            });
+        }
+
+        res.status(201).json({
+            mensaje: "Mensaje de contacto enviado correctamente"
+        });
+    });
+});
+
+app.get('/contactanos', requiereAdministrador, (req, res) => {
+    const sql = "SELECT id, nombre, correo, asunto, mensaje FROM Contactanos ORDER BY id DESC";
+
+    conexion.query(sql, (error, resultados) => {
+        if (error) {
+            console.error("Error al consultar los mensajes de contacto:", error);
+            return res.status(500).json({
+                mensaje: "Error al consultar los mensajes de contacto"
+            });
+        }
+
+        res.json(resultados);
+    });
+});
+
+app.delete('/contactanos/:id', requiereAdministrador, (req, res) => {
+    const { id } = req.params;
+
+    if (!/^[1-9]\d*$/.test(id)) {
+        return res.status(400).json({
+            mensaje: "El identificador del mensaje no es válido"
+        });
+    }
+
+    const sql = "DELETE FROM Contactanos WHERE id = ?";
+
+    conexion.query(sql, [id], (error, resultados) => {
+        if (error) {
+            console.error("Error al eliminar el mensaje de contacto:", error);
+            return res.status(500).json({
+                mensaje: "Error al eliminar el mensaje de contacto"
+            });
+        }
+
+        if (resultados.affectedRows === 0) {
+            return res.status(404).json({
+                mensaje: "No se encontró el mensaje"
+            });
+        }
+
+        res.json({
+            mensaje: "Mensaje eliminado correctamente"
+        });
+    });
+});
+
+//Actializar un producto existente (UPDATE)
+app.put('/productos/:id', (req, res) => {
+    const { id } = req.params;
+    const { nombre, precio, stock } = req.body;
+
+    const sql = "UPDATE productos SET nombre = ?, precio = ?, stock = ? WHERE id = ?";
+    const valores = [nombre, precio, stock, id];
+
+    conexion.query(sql, valores, (error, resultados) => {
+        if (error) {
+            console.error("Error al actualizar el producto:", error);
+            return res.status(500).json({
+                mensaje: "Error al actualizar el producto"
+            });
+        }
+        res.status(200).json({
+            mensaje: "Producto actualizado correctamente",
+        });
+    });
+});
+//eliminar un producto existente (DELETE)
+app.delete('/productos/:id', (req, res) => {
+    const { id } = req.params;
+
+    const sql = "DELETE FROM productos WHERE id = ?";
+
+    conexion.query(sql, [id], (error, resultados) => {
+        if (error) {
+            console.error("Error al eliminar el producto:", error);
+            return res.status(500).json({
+                mensaje: "Error al eliminar el producto"
+            });
+        }
+        if (resultados.affectedRows === 0) {
+            return res.status(404).json({
+                mensaje: "No se encontró el producto"
+            });
+        }
+        res.json({
+            mensaje: "Producto eliminado correctamente"
+        });
+    });
+});
+
+// Iniciar el servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });

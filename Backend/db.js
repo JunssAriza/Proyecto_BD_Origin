@@ -1,19 +1,34 @@
+require('dotenv').config();
 const mysql = require('mysql2');
 
-// Configuracion de la conexion a la base de datos mysql
-const conexion = mysql.createConnection({
-    host: 'localhost',  //Servidor local
-    user: 'root',       //Usuario de MySql (Por defecto en XAMPP)
-    database: 'tienda'  //Nombre de la base de datos
-});
+const host = process.env.DB_HOST || 'localhost';
+const port = Number(process.env.DB_PORT) || '3306';
+const user = process.env.DB_USER || 'root';
+const password = process.env.DB_PASSWORD || '';
+const database = process.env.DB_NAME || 'tienda';
 
-// Comprobar si la conexion fue exitosa
+const configuracion = {
+    host,
+    port,
+    user,
+    password,
+    database
+};
+
+if (host !== 'localhost' && host !== '127.0.0.1') {
+    configuracion.ssl = {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true
+    };
+}
+const conexion = mysql.createConnection(configuracion);
+
 conexion.connect((error) => {
     if (error) {
-        console.error("Error al conectar con MySql",error);
+        console.error("Error de conexion:", error);
         return;
     }
-    console.log("Conexion exitosa a MySql");
+    console.log(`Conexión exitosa a MySQL en ${host}:${port}`);
 });
-// Exportar la conexion para poder usarla en otros archivos
+
 module.exports = conexion;
